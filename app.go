@@ -4,16 +4,42 @@ package sv
 
 import (
 	"os"
+	"fmt"
+	"reflect"
 	"strconv"
 	"io/ioutil"
 	"path/filepath"
 	"github.com/kardianos/osext"
+	"github.com/doourbest/sv/utils"
 )
 
 var baseDir string = ""
 
 func init() {
 	appInitDir()
+}
+
+func AppStart(app interface{}) error {
+	if len(os.Args)<=1 {
+		return fmt.Errorf("No command specify")
+	}
+
+	cmd := os.Args[1]
+
+	v := reflect.ValueOf(app)
+	n := "Cmd"+utils.UcFirst(cmd)
+	f := v.MethodByName(n)
+	if !f.IsValid() {
+		return fmt.Errorf("No such command [%s]", cmd)
+	}
+
+	if f.Type().NumIn()!=0 {
+		return fmt.Errorf("No such command [%s] because [func %s should not take any parameter]", cmd, n)
+	}
+
+	f.Call([]reflect.Value{})
+
+	return nil
 }
 
 func AppWritePidFile(path string) {
