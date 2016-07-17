@@ -255,8 +255,7 @@ func AppParseConf(i interface{}) error {
 				return fmt.Errorf("field [%s] parse configuration failed: %s", name, err.Error())
 			}
 		} else if strings.HasPrefix(name,"Conf") {
-			conf := utils.LcFirst(strings.TrimPrefix(name,"Conf"))
-			conf = strings.TrimPrefix(conf,"_")
+			conf := strings.TrimPrefix(utils.LcFirst(strings.TrimPrefix(name,"Conf")),"_")
 			file := AppConfDir() + "/" + conf + ".toml"
 			_,err := toml.DecodeFile(file,f.Addr().Interface())
 			if err!=nil {
