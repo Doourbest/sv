@@ -23,13 +23,21 @@ var GraceOptions struct {
 
 var restartSignal = syscall.SIGHUP
 
-func GraceListenAndServe(addr string, handler http.Handler) error {
+func GraceListenAndServe(addr string, handler http.Handler, beforebeginFuncs ...func(add string)) error {
 	err := graceConfig();
 	if err!=nil {
 		return err
 	}
 	restartSignal = syscall.SIGHUP
-	return endless.ListenAndServe(addr, handler)
+	server := endless.NewServer(addr, handler)
+	if len(beforebeginFuncs)>0 {
+		server.BeforeBegin  = func(addr string) {
+			for _,f := range beforebeginFuncs {
+				f(addr)
+			}
+		}
+	}
+	return server.ListenAndServe()
 }
 
 func graceConfig() error{
